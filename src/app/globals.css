@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+  
+  body {
+    @apply bg-primary-bg-secondary text-text-primary font-sans;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  input:focus {
+    outline: none;
+  }
+  
+  /* Prevent pull-to-refresh on mobile */
+  body {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Improve button touch targets on mobile */
+  button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-3 min-h-[48px] rounded-lg font-medium select-none touch-manipulation;
+  }
+  
+  .btn-primary {
+    @apply btn bg-action-primary text-white hover:bg-gray-800 active:bg-gray-900;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-action-secondary text-text-primary hover:bg-gray-200 active:bg-gray-300;
+  }
+  
+  .btn-outline {
+    @apply btn bg-white border border-border text-text-primary hover:bg-gray-50 active:bg-gray-100;
+  }
+  
+  .btn-danger {
+    @apply btn bg-action-danger text-white hover:bg-red-700 active:bg-red-800;
+  }
+  
+  .btn-success {
+    @apply btn bg-action-success text-white hover:bg-green-700 active:bg-green-800;
+  }
+  
+  .btn-ghost {
+    @apply btn bg-transparent text-text-muted hover:bg-gray-100 active:bg-gray-200;
+  }
+  
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-11 h-11 rounded-lg text-text-muted hover:bg-gray-100 active:bg-gray-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl border border-border p-6;
+  }
+  
+  .input {
+    @apply w-full h-12 px-4 bg-white border border-border rounded-lg text-text-primary placeholder:text-text-placeholder focus:border-border-focus focus:ring-1 focus:ring-border-focus;
+  }
+  
+  .label {
+    @apply text-xs font-medium uppercase tracking-wide text-text-muted;
+  }
+  
+  .score-display {
+    @apply font-mono text-6xl font-bold text-text-primary tabular-nums;
+  }
+  
+  .timer-display {
+    @apply font-mono text-2xl font-semibold tabular-nums;
+  }
+}
