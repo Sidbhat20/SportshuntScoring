@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { Card } from '@/components/ui'
 import { SPORTS } from '@/lib/types'
 
@@ -12,7 +11,7 @@ export default function HomePage() {
       <div className="bg-white border-b border-border">
         <div className="max-w-xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Image src="/logo.jpeg" alt="Sportshunt" width={40} height={40} className="rounded-lg sm:w-12 sm:h-12" />
+            <img src="/SportshuntScoring/logo.jpeg" alt="Sportshunt" width={40} height={40} className="rounded-lg sm:w-12 sm:h-12" />
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Sportshunt</h1>
               <p className="text-sm sm:text-base text-text-muted">Scoreboard</p>

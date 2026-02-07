@@ -2,7 +2,6 @@
 
 import { ReactNode } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 type SetupLayoutProps = {
   children: ReactNode
@@ -27,7 +26,7 @@ export function SetupLayout({ children, title, subtitle, sportName, onStart }: S
             </svg>
             <span className="font-medium">Back</span>
           </Link>
-          <Image src="/logo.jpeg" alt="Sportshunt" width={32} height={32} className="rounded-md" />
+          <img src="/SportshuntScoring/logo.jpeg" alt="Sportshunt" width={32} height={32} className="rounded-md" />
         </div>
       </div>
       

@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   title: 'Sportshunt - Scoreboard',
   description: 'Professional multi-sport scoreboard application for live match scoring',
   icons: {
-    icon: '/logo.jpeg',
-    apple: '/logo.jpeg',
+    icon: '/SportshuntScoring/logo.jpeg',
+    apple: '/SportshuntScoring/logo.jpeg',
   },
   viewport: {
     width: 'device-width',
