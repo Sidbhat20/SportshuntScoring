@@ -8,8 +8,11 @@ import { useGolfStore, getTotalScore, getRelativeToPar, formatRelativeToPar } fr
 export default function GolfGamePage() {
   const router = useRouter()
   const store = useGolfStore()
-  
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    store.loadState()
+    if (store.players.length === 0) router.push('/golf/setup')
   }, [])
   
   const handleReset = () => { if (confirm('Reset round?')) { store.reset(); router.push('/golf/setup') } }
