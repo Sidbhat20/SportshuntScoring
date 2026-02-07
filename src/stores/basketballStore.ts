@@ -37,6 +37,8 @@ type BasketballState = {
   resetShotClock: (seconds: number) => void
   clearViolation: () => void
   nextQuarter: () => void
+  setGameClock: (seconds: number) => void
+  setShotClockTime: (seconds: number) => void
   undo: () => void
   reset: () => void
   loadState: () => void
@@ -189,6 +191,16 @@ export const useBasketballStore = create<BasketballState>((set, get) => ({
     } else {
       set({ isComplete: true, isRunning: false })
     }
+    saveToStorage(STORAGE_KEY, get())
+  },
+  
+  setGameClock: (seconds) => {
+    set({ gameClockSeconds: Math.max(0, seconds) })
+    saveToStorage(STORAGE_KEY, get())
+  },
+  
+  setShotClockTime: (seconds) => {
+    set({ shotClockSeconds: Math.max(0, Math.min(24, seconds)), shotClockViolation: false })
     saveToStorage(STORAGE_KEY, get())
   },
   

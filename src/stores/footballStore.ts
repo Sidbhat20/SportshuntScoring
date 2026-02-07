@@ -53,6 +53,8 @@ type FootballState = {
   startPenalties: () => void
   endAsDraw: () => void
   recordPenalty: (team: 'home' | 'away', scored: boolean) => void
+  setTimer: (seconds: number) => void
+  setStoppageTime: (minutes: number) => void
   undo: () => void
   reset: () => void
   loadState: () => void
@@ -285,6 +287,16 @@ export const useFootballStore = create<FootballState>((set, get) => ({
       }
     }
     
+    saveToStorage(STORAGE_KEY, get())
+  },
+  
+  setTimer: (seconds) => {
+    set({ timerSeconds: Math.max(0, seconds) })
+    saveToStorage(STORAGE_KEY, get())
+  },
+  
+  setStoppageTime: (minutes) => {
+    set({ stoppageTime: Math.max(0, minutes) })
     saveToStorage(STORAGE_KEY, get())
   },
   

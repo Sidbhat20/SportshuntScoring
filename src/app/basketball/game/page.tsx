@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { GameLayout } from '@/components/layout'
 import { Scoreboard, ControlPanel, TimerDisplay } from '@/components/game'
-import { Button, Card } from '@/components/ui'
+import { Button, Card, Modal, Input } from '@/components/ui'
 import { useBasketballStore } from '@/stores/basketballStore'
 
 export default function BasketballGamePage() {
@@ -12,6 +12,10 @@ export default function BasketballGamePage() {
   const store = useBasketballStore()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const violationTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [timeEditModal, setTimeEditModal] = useState(false)
+  const [editingClock, setEditingClock] = useState<'game' | 'shot'>('game')
+  const [minutes, setMinutes] = useState('0')
+  const [seconds, setSeconds] = useState('0')
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -59,6 +63,24 @@ export default function BasketballGamePage() {
     }
   }
   
+  const openTimeEdit = (clockType: 'game' | 'shot') => {
+    const totalSeconds = clockType === 'game' ? store.gameClockSeconds : store.shotClockSeconds
+    setMinutes(Math.floor(totalSeconds / 60).toString())
+    setSeconds((totalSeconds % 60).toString())
+    setEditingClock(clockType)
+    setTimeEditModal(true)
+  }
+  
+  const handleTimeUpdate = () => {
+    const totalSeconds = (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0)
+    if (editingClock === 'game') {
+      store.setGameClock(totalSeconds)
+    } else {
+      store.setShotClockTime(totalSeconds)
+    }
+    setTimeEditModal(false)
+  }
+  
   if (!store.homeTeam) {
     return null
   }
@@ -82,6 +104,9 @@ export default function BasketballGamePage() {
       {/* Timers */}
       <div className="flex justify-center items-center gap-8 mb-4">
         <div className="text-center">
+          <div className="flex items-center gap-2 justify-center mb-1">
+            <button onClick={() => openTimeEdit('game')} className="text-xs text-blue-600 hover:text-blue-700">⏱️ Edit</button>
+          </div>
           <TimerDisplay 
             seconds={store.gameClockSeconds} 
             isRunning={store.isRunning}
@@ -91,6 +116,9 @@ export default function BasketballGamePage() {
           <div className="text-xs text-text-muted uppercase mt-1">Game Clock</div>
         </div>
         <div className="text-center">
+          <div className="flex items-center gap-2 justify-center mb-1">
+            <button onClick={() => openTimeEdit('shot')} className="text-xs text-blue-600 hover:text-blue-700">⏱️ Edit</button>
+          </div>
           <div className={`font-mono text-3xl font-bold tabular-nums ${store.shotClockSeconds <= 5 || store.shotClockViolation ? 'text-action-danger' : 'text-text-primary'}`}>
             {store.shotClockSeconds}
           </div>
@@ -207,6 +235,35 @@ export default function BasketballGamePage() {
           </Button>
         </Card>
       )}
+      
+      {/* Time Edit Modal */}
+      <Modal isOpen={timeEditModal} onClose={() => setTimeEditModal(false)} title={`Edit ${editingClock === 'game' ? 'Game Clock' : 'Shot Clock'}`}>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Minutes"
+              type="number"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              min="0"
+            />
+            <Input
+              label="Seconds"
+              type="number"
+              value={seconds}
+              onChange={(e) => setSeconds(e.target.value)}
+              min="0"
+              max="59"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <Button variant="outline" onClick={() => { setMinutes((parseInt(minutes) + 1).toString()) }}>+1 min</Button>
+            <Button variant="outline" onClick={() => { setSeconds((parseInt(seconds) + 30).toString()) }}>+30 sec</Button>
+            <Button variant="outline" onClick={() => { const newMin = Math.max(0, parseInt(minutes) - 1); setMinutes(newMin.toString()) }}>-1 min</Button>
+          </div>
+          <Button variant="primary" className="w-full" onClick={handleTimeUpdate}>Apply</Button>
+        </div>
+      </Modal>
     </GameLayout>
   )
 }

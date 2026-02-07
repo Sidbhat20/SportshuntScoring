@@ -28,6 +28,7 @@ type HockeyState = {
   stopTimer: () => void
   tick: () => void
   endPeriod: () => void
+  setTimer: (seconds: number) => void
   undo: () => void
   reset: () => void
   loadState: () => void
@@ -152,6 +153,11 @@ export const useHockeyStore = create<HockeyState>((set, get) => ({
     } else {
       set({ isComplete: true, isRunning: false })
     }
+    saveToStorage(STORAGE_KEY, get())
+  },
+  
+  setTimer: (seconds) => {
+    set({ timerSeconds: Math.max(0, seconds) })
     saveToStorage(STORAGE_KEY, get())
   },
   

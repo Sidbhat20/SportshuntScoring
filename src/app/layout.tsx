@@ -11,18 +11,19 @@ export const metadata: Metadata = {
     icon: '/SportshuntScoring/logo.jpeg',
     apple: '/SportshuntScoring/logo.jpeg',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
-  themeColor: '#111827',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Sportshunt',
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#111827',
 }
 
 export default function RootLayout({

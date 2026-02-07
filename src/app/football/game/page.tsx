@@ -20,6 +20,9 @@ export default function FootballGamePage() {
   const [playerName, setPlayerName] = useState('')
   const [showDrawOptions, setShowDrawOptions] = useState(false)
   const [extraTimeMinutes, setExtraTimeMinutes] = useState('15')
+  const [timeEditModal, setTimeEditModal] = useState(false)
+  const [minutes, setMinutes] = useState('0')
+  const [seconds, setSeconds] = useState('0')
   
   // Load state and redirect if not setup
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,6 +87,18 @@ export default function FootballGamePage() {
     }
   }
   
+  const openTimeEdit = () => {
+    setMinutes(Math.floor(store.timerSeconds / 60).toString())
+    setSeconds((store.timerSeconds % 60).toString())
+    setTimeEditModal(true)
+  }
+  
+  const handleTimeUpdate = () => {
+    const totalSeconds = (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0)
+    store.setTimer(totalSeconds)
+    setTimeEditModal(false)
+  }
+  
   const getYellowWarning = () => {
     if (cardModal.type !== 'yellow' || !playerName.trim()) return null
     const existingYellows = cardModal.team === 'home' ? store.homeYellowCards : store.awayYellowCards
@@ -140,6 +155,9 @@ export default function FootballGamePage() {
       {/* Timer (not shown during penalties) */}
       {store.gamePhase !== 'penalties' && store.gamePhase !== 'complete' && (
         <div className="text-center mb-4">
+          <div className="flex items-center gap-2 justify-center mb-1">
+            <button onClick={openTimeEdit} className="text-xs text-blue-600 hover:text-blue-700">⏱️ Edit</button>
+          </div>
           <TimerDisplay 
             seconds={store.timerSeconds} 
             isRunning={store.isRunning}
@@ -390,6 +408,44 @@ export default function FootballGamePage() {
         {getYellowWarning() && (
           <p className="mt-2 text-sm text-action-warning">{getYellowWarning()}</p>
         )}
+      </Modal>
+      
+      {/* Time Edit Modal */}
+      <Modal isOpen={timeEditModal} onClose={() => setTimeEditModal(false)} title="Edit Match Time">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Minutes"
+              type="number"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              min="0"
+            />
+            <Input
+              label="Seconds"
+              type="number"
+              value={seconds}
+              onChange={(e) => setSeconds(e.target.value)}
+              min="0"
+              max="59"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <Button variant="outline" onClick={() => { setMinutes((parseInt(minutes) + 1).toString()) }}>+1 min</Button>
+            <Button variant="outline" onClick={() => { setSeconds((parseInt(seconds) + 30).toString()) }}>+30 sec</Button>
+            <Button variant="outline" onClick={() => { const newMin = Math.max(0, parseInt(minutes) - 1); setMinutes(newMin.toString()) }}>-1 min</Button>
+          </div>
+          <Button variant="primary" className="w-full" onClick={handleTimeUpdate}>Apply</Button>
+          <div className="mt-3 pt-3 border-t border-border">
+            <Input
+              label="Stoppage Time (minutes)"
+              type="number"
+              value={store.stoppageTime.toString()}
+              onChange={(e) => store.setStoppageTime(parseInt(e.target.value) || 0)}
+              min="0"
+            />
+          </div>
+        </div>
       </Modal>
     </GameLayout>
   )

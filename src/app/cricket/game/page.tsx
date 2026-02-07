@@ -12,6 +12,8 @@ export default function CricketGamePage() {
   const [extrasModal, setExtrasModal] = useState(false)
   const [dismissalModal, setDismissalModal] = useState(false)
   const [scorecardModal, setScorecardModal] = useState(false)
+  const [penaltyModal, setPenaltyModal] = useState(false)
+  const [penaltyRuns, setPenaltyRuns] = useState('5')
   const [playerModal, setPlayerModal] = useState<{ type: 'striker' | 'nonStriker' | 'bowler'; open: boolean }>({ type: 'striker', open: false })
   const [playerName, setPlayerName] = useState('')
   
@@ -42,6 +44,17 @@ export default function CricketGamePage() {
     store.addWicket(type)
     store.nextBall()
     setDismissalModal(false)
+  }
+  
+  const handleRetiredHurt = () => {
+    store.addWicket('retired', true)
+    setDismissalModal(false)
+  }
+  
+  const handlePenaltyRuns = () => {
+    const runs = parseInt(penaltyRuns) || 5
+    store.addPenaltyRuns(runs)
+    setPenaltyModal(false)
   }
   
   const handlePlayerUpdate = () => {
@@ -99,6 +112,11 @@ export default function CricketGamePage() {
         awayScore={store.innings === 2 ? `${batting === 'home' ? store.awayRuns : store.homeRuns}/${batting === 'home' ? store.awayWickets : store.homeWickets}` : '-'}
         homeExtra={
           <div className="space-y-1">
+            {store.isFreeHit && (
+              <div className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-semibold animate-pulse">
+                ⚡ FREE HIT
+              </div>
+            )}
             <div className="text-lg font-mono">
               ({formatOvers(overs, balls)} ov)
             </div>
@@ -249,9 +267,10 @@ export default function CricketGamePage() {
       
       {/* Action Buttons */}
       {!store.isComplete && (
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-3 gap-3">
         <Button variant="danger" className="h-14" onClick={handleWicket}>Wicket</Button>
         <Button variant="warning" className="h-14" onClick={() => setExtrasModal(true)}>Extras</Button>
+        <Button variant="outline" className="h-14" onClick={() => setPenaltyModal(true)}>Penalty</Button>
       </div>
       )}
       
@@ -290,22 +309,35 @@ export default function CricketGamePage() {
       <Modal isOpen={extrasModal} onClose={() => setExtrasModal(false)} title="Extras">
         <div className="space-y-3">
           <Button variant="secondary" className="w-full" onClick={() => { store.addExtra('wide'); setExtrasModal(false) }}>Wide (+1)</Button>
-          <Button variant="secondary" className="w-full" onClick={() => { store.addExtra('noBall'); setExtrasModal(false) }}>No Ball (+1)</Button>
+          <Button variant="secondary" className="w-full" onClick={() => { store.addExtra('noBall'); setExtrasModal(false) }}>No Ball (+1) - Free Hit Next</Button>
           <Button variant="secondary" className="w-full" onClick={() => { store.addExtra('byes', 1); store.nextBall(); setExtrasModal(false) }}>Byes (+1)</Button>
           <Button variant="secondary" className="w-full" onClick={() => { store.addExtra('legByes', 1); store.nextBall(); setExtrasModal(false) }}>Leg Byes (+1)</Button>
           <div className="border-t border-border pt-3 mt-3">
             <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">Wide + Runs</div>
-            <div className="grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((r) => (
+            <div className="grid grid-cols-5 gap-2">
+              {[1, 2, 3, 4, 5].map((r) => (
                 <Button key={r} variant="outline" onClick={() => { store.addExtra('wide', r); setExtrasModal(false) }}>W+{r}</Button>
               ))}
             </div>
           </div>
           <div className="border-t border-border pt-3">
             <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">No Ball + Runs</div>
-            <div className="grid grid-cols-5 gap-2">
-              {[1, 2, 3, 4, 6].map((r) => (
+            <div className="grid grid-cols-6 gap-2">
+              {[1, 2, 3, 4, 5, 6].map((r) => (
                 <Button key={r} variant="outline" onClick={() => { store.addExtra('noBall', r); setExtrasModal(false) }}>NB+{r}</Button>
+              ))}
+            </div>
+          </div>
+          <div className="border-t border-border pt-3">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">Byes/Leg Byes + Overthrows</div>
+            <div className="grid grid-cols-4 gap-2">
+              {[2, 3, 4, 5].map((r) => (
+                <Button key={r} variant="outline" onClick={() => { store.addExtra('byes', r); store.nextBall(); setExtrasModal(false) }}>{r}b</Button>
+              ))}
+            </div>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {[2, 3, 4, 5].map((r) => (
+                <Button key={r} variant="outline" onClick={() => { store.addExtra('legByes', r); store.nextBall(); setExtrasModal(false) }}>{r}lb</Button>
               ))}
             </div>
           </div>
@@ -321,8 +353,11 @@ export default function CricketGamePage() {
           <Button variant="secondary" onClick={() => handleDismissalSelect('runout')}>Run Out</Button>
           <Button variant="secondary" onClick={() => handleDismissalSelect('stumped')}>Stumped</Button>
           <Button variant="secondary" onClick={() => handleDismissalSelect('hitwicket')}>Hit Wicket</Button>
-          <Button variant="secondary" onClick={() => handleDismissalSelect('retired')}>Retired</Button>
+          <Button variant="secondary" onClick={() => handleDismissalSelect('retired')}>Retired Out</Button>
           <Button variant="secondary" onClick={() => handleDismissalSelect('other')}>Other</Button>
+        </div>
+        <div className="mt-3 pt-3 border-t border-border">
+          <Button variant="outline" className="w-full" onClick={handleRetiredHurt}>Retired Hurt (Not Out)</Button>
         </div>
       </Modal>
       
@@ -336,6 +371,22 @@ export default function CricketGamePage() {
             placeholder="Enter name"
           />
           <Button variant="primary" className="w-full" onClick={handlePlayerUpdate}>Update</Button>
+        </div>
+      </Modal>
+      
+      {/* Penalty Runs Modal */}
+      <Modal isOpen={penaltyModal} onClose={() => setPenaltyModal(false)} title="Penalty Runs">
+        <div className="space-y-3">
+          <p className="text-sm text-text-muted">Award penalty runs to the batting team (typically 5 for ball tampering, field infractions, etc.)</p>
+          <Input
+            label="Penalty Runs"
+            type="number"
+            value={penaltyRuns}
+            onChange={(e) => setPenaltyRuns(e.target.value)}
+            placeholder="5"
+            min="1"
+          />
+          <Button variant="primary" className="w-full" onClick={handlePenaltyRuns}>Add Penalty Runs</Button>
         </div>
       </Modal>
       

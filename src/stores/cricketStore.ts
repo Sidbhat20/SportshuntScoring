@@ -63,6 +63,7 @@ interface OverBall {
   extraType?: 'wide' | 'noBall' | 'byes' | 'legByes'
   isFour: boolean
   isSix: boolean
+  isFreeHit?: boolean
 }
 
 interface CricketState {
@@ -98,11 +99,14 @@ interface CricketState {
   currentPartnership: number
   recentOvers: OverBall[][]
   currentOver: OverBall[]
+  isFreeHit: boolean
+  penaltyRuns: number
   
   setSetup: (homeTeam: string, awayTeam: string, format: CricketFormat, maxOvers: number) => void
   addRuns: (runs: number, isFour?: boolean, isSix?: boolean) => void
-  addWicket: (dismissalType?: DismissalType) => void
+  addWicket: (dismissalType?: DismissalType, isRetiredHurt?: boolean) => void
   addExtra: (type: 'wide' | 'noBall' | 'byes' | 'legByes', runs?: number) => void
+  addPenaltyRuns: (runs: number) => void
   nextBall: () => void
   switchInnings: () => void
   endMatch: () => void
@@ -170,6 +174,8 @@ export const useCricketStore = create<CricketState>((set, get) => ({
   currentPartnership: 0,
   recentOvers: [],
   currentOver: [],
+  isFreeHit: false,
+  penaltyRuns: 0,
   
   setSetup: (homeTeam, awayTeam, format, maxOvers) => {
     const state = {
@@ -203,6 +209,8 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentPartnership: 0,
       recentOvers: [],
       currentOver: [],
+      isFreeHit: false,
+      penaltyRuns: 0,
     }
     set(state)
     saveToStorage(STORAGE_KEY, state)
@@ -233,6 +241,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       isExtra: false,
       isFour,
       isSix,
+      isFreeHit: state.isFreeHit,
     }]
     
     const newState = {
@@ -243,6 +252,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentBowler: newBowler,
       currentPartnership: state.currentPartnership + runs,
       currentOver: newCurrentOver,
+      isFreeHit: false,
       actions: [...state.actions, { type: 'addRuns', team: batting, value: runs, timestamp: Date.now(), previousState: state }],
     }
     
@@ -277,8 +287,14 @@ export const useCricketStore = create<CricketState>((set, get) => ({
     return newState
   }),
   
-  addWicket: (dismissalType: DismissalType = 'other') => set((state) => {
+  addWicket: (dismissalType: DismissalType = 'other', isRetiredHurt = false) => set((state) => {
     const batting = state.battingTeam
+    
+    // On free hit, only run outs are valid dismissals
+    if (state.isFreeHit && dismissalType !== 'runout') {
+      return state
+    }
+    
     const newWickets = batting === 'home' ? state.homeWickets + 1 : state.awayWickets + 1
     const currentRuns = batting === 'home' ? state.homeRuns : state.awayRuns
     const currentOvers = batting === 'home' ? state.homeOvers : state.awayOvers
@@ -302,24 +318,25 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       balls: state.currentBatsmen.strikerBalls,
       fours: state.currentBatsmen.strikerFours,
       sixes: state.currentBatsmen.strikerSixes,
-      isOut: true,
-      dismissalType,
-      bowlerName: state.currentBowler.name,
+      isOut: !isRetiredHurt,
+      dismissalType: isRetiredHurt ? 'retired' : dismissalType,
+      bowlerName: isRetiredHurt ? undefined : state.currentBowler.name,
     }
     
-    // Update bowler's wicket count
+    // Update bowler's wicket count (not for retired hurt)
     const newBowler = {
       ...state.currentBowler,
-      wickets: state.currentBowler.wickets + 1,
+      wickets: isRetiredHurt ? state.currentBowler.wickets : state.currentBowler.wickets + 1,
     }
     
     // Add to current over
     const newCurrentOver = [...state.currentOver, {
       runs: 0,
-      isWicket: true,
+      isWicket: !isRetiredHurt,
       isExtra: false,
       isFour: false,
       isSix: false,
+      isFreeHit: state.isFreeHit,
     }]
     
     // Reset striker for new batsman
@@ -334,16 +351,17 @@ export const useCricketStore = create<CricketState>((set, get) => ({
     
     const newState = {
       ...state,
-      homeWickets: batting === 'home' ? newWickets : state.homeWickets,
-      awayWickets: batting === 'away' ? newWickets : state.awayWickets,
-      homeFallOfWickets: batting === 'home' ? [...state.homeFallOfWickets, fallOfWicket] : state.homeFallOfWickets,
-      awayFallOfWickets: batting === 'away' ? [...state.awayFallOfWickets, fallOfWicket] : state.awayFallOfWickets,
+      homeWickets: batting === 'home' && !isRetiredHurt ? newWickets : state.homeWickets,
+      awayWickets: batting === 'away' && !isRetiredHurt ? newWickets : state.awayWickets,
+      homeFallOfWickets: batting === 'home' && !isRetiredHurt ? [...state.homeFallOfWickets, fallOfWicket] : state.homeFallOfWickets,
+      awayFallOfWickets: batting === 'away' && !isRetiredHurt ? [...state.awayFallOfWickets, fallOfWicket] : state.awayFallOfWickets,
       homeBattingCard: batting === 'home' ? [...state.homeBattingCard, newBatsman] : state.homeBattingCard,
       awayBattingCard: batting === 'away' ? [...state.awayBattingCard, newBatsman] : state.awayBattingCard,
       currentBatsmen: newBatsmen,
       currentBowler: newBowler,
       currentPartnership: 0,
       currentOver: newCurrentOver,
+      isFreeHit: false,
       actions: [...state.actions, { type: 'addWicket', team: batting, value: null, timestamp: Date.now(), previousState: state }],
     }
     
@@ -404,7 +422,11 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       extraType: type,
       isFour: false,
       isSix: false,
+      isFreeHit: state.isFreeHit,
     }]
+    
+    // Free hit on no ball
+    const setFreeHit = type === 'noBall'
     
     const newState = {
       ...state,
@@ -416,6 +438,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentBowler: newBowler,
       currentPartnership: state.currentPartnership + extraRuns,
       currentOver: newCurrentOver,
+      isFreeHit: setFreeHit,
       actions: [...state.actions, { type: 'addExtra', team: batting, value: { extraType: type, runs: extraRuns }, timestamp: Date.now(), previousState: state }],
     }
     
@@ -446,6 +469,20 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       }
     }
     
+    saveToStorage(STORAGE_KEY, newState)
+    return newState
+  }),
+  
+  addPenaltyRuns: (runs) => set((state) => {
+    const batting = state.battingTeam
+    const newState = {
+      ...state,
+      homeRuns: batting === 'home' ? state.homeRuns + runs : state.homeRuns,
+      awayRuns: batting === 'away' ? state.awayRuns + runs : state.awayRuns,
+      penaltyRuns: state.penaltyRuns + runs,
+      currentPartnership: state.currentPartnership + runs,
+      actions: [...state.actions, { type: 'addPenalty', team: batting, value: runs, timestamp: Date.now(), previousState: state }],
+    }
     saveToStorage(STORAGE_KEY, newState)
     return newState
   }),
@@ -532,10 +569,14 @@ export const useCricketStore = create<CricketState>((set, get) => ({
         nonStrikerSixes: tempStrikerSixes,
       }
     } else {
-      // Rotate strike on odd runs (1, 3, 5) - but not for wides or no balls
+      // Rotate strike on odd runs (1, 3, 5)
       const lastBall = state.currentOver[state.currentOver.length - 1]
+      
+      // For wide/no ball with odd runs, rotate strike
       const isWideOrNoBall = lastBall?.isExtra && (lastBall.extraType === 'wide' || lastBall.extraType === 'noBall')
-      if (lastBall && !isWideOrNoBall && !lastBall.isWicket && lastBall.runs % 2 === 1) {
+      const shouldRotate = lastBall && !lastBall.isWicket && lastBall.runs % 2 === 1
+      
+      if (shouldRotate) {
         const tempStriker = state.currentBatsmen.striker
         const tempStrikerRuns = state.currentBatsmen.strikerRuns
         const tempStrikerBalls = state.currentBatsmen.strikerBalls
@@ -642,6 +683,8 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentPartnership: 0,
       currentOver: [],
       recentOvers: [],
+      isFreeHit: false,
+      penaltyRuns: 0,
       actions: [...state.actions, { type: 'switchInnings', team: null, value: null, timestamp: Date.now(), previousState: state }],
     }
     saveToStorage(STORAGE_KEY, newState)
@@ -834,6 +877,8 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentPartnership: 0,
       recentOvers: [],
       currentOver: [],
+      isFreeHit: false,
+      penaltyRuns: 0,
     })
   },
   
