@@ -21,6 +21,7 @@ export default function SnookerGamePage() {
   const store = useSnookerStore()
   const [foulModal, setFoulModal] = useState(false)
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.playerA) router.push('/snooker/setup')

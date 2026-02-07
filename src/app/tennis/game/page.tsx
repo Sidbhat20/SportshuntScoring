@@ -11,6 +11,7 @@ export default function TennisGamePage() {
   const router = useRouter()
   const store = useTennisStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.playerA) {

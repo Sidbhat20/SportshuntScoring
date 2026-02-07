@@ -171,10 +171,12 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
     } else if (lastAction.type === 'addAllOut' && lastAction.team) {
       if (lastAction.team === 'home') {
         newState.homeScore = Math.max(0, state.homeScore - 2)
-        newState.awayPlayers = 0
+        // Restore the state before all-out: opposing team had 0 players
+        newState.awayPlayers = state.awayPlayers > 0 ? 0 : state.awayPlayers
       } else {
         newState.awayScore = Math.max(0, state.awayScore - 2)
-        newState.homePlayers = 0
+        // Restore the state before all-out: opposing team had 0 players
+        newState.homePlayers = state.homePlayers > 0 ? 0 : state.homePlayers
       }
     } else if (lastAction.type === 'playerOut' && lastAction.team) {
       if (lastAction.team === 'home') newState.homePlayers = Math.min(7, state.homePlayers + 1)

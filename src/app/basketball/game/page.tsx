@@ -13,6 +13,7 @@ export default function BasketballGamePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const violationTimerRef = useRef<NodeJS.Timeout | null>(null)
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.homeTeam) {

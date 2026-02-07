@@ -135,6 +135,7 @@ export const useHockeyStore = create<HockeyState>((set, get) => ({
         homePenalties: newHomePenalties,
         awayPenalties: newAwayPenalties
       })
+      saveToStorage(STORAGE_KEY, get())
     }
   },
   

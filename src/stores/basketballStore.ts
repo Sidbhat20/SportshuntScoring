@@ -160,26 +160,8 @@ export const useBasketballStore = create<BasketballState>((set, get) => ({
       if (newShotClock === 0 && newGameClock > 0) {
         set({ isRunning: false, shotClockViolation: true })
       }
-    }
-  },
-  
-  resetShotClock: (seconds) => {
-    set({ shotClockSeconds: seconds, shotClockViolation: false })
-    saveToStorage(STORAGE_KEY, get())
-  },
-  
-  clearViolation: () => {
-    set({ shotClockViolation: false, shotClockSeconds: 24, isRunning: true })
-    saveToStorage(STORAGE_KEY, get())
-  },
-  
-  nextQuarter: () => {
-    const state = get()
-    if (state.currentQuarter < 4) {
-      set({
-        currentQuarter: (state.currentQuarter + 1) as 1 | 2 | 3 | 4,
-        gameClockSeconds: state.quarterDurationSeconds,
-        shotClockSeconds: 24,
+      
+      saveToStorage(STORAGE_KEY, get())
         homeFouls: 0,
         awayFouls: 0,
         isRunning: false

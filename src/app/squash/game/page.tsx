@@ -10,6 +10,7 @@ export default function SquashGamePage() {
   const router = useRouter()
   const store = useSquashStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.playerA) router.push('/squash/setup')

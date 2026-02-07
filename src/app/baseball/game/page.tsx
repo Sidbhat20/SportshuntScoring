@@ -9,6 +9,7 @@ export default function BaseballGamePage() {
   const router = useRouter()
   const store = useBaseballStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.homeTeam) router.push('/baseball/setup')

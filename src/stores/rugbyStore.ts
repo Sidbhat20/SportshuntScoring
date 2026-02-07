@@ -251,6 +251,7 @@ export const useRugbyStore = create<RugbyState>((set, get) => ({
         homeYellowCards: newHomeYellowCards,
         awayYellowCards: newAwayYellowCards
       })
+      saveToStorage(STORAGE_KEY, get())
     }
   },
   

@@ -9,9 +9,7 @@ export default function GolfGamePage() {
   const router = useRouter()
   const store = useGolfStore()
   
-  useEffect(() => {
-    store.loadState()
-    if (store.players.length === 0) router.push('/golf/setup')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
   const handleReset = () => { if (confirm('Reset round?')) { store.reset(); router.push('/golf/setup') } }

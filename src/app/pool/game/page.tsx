@@ -10,6 +10,7 @@ export default function PoolGamePage() {
   const router = useRouter()
   const store = usePoolStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.playerA) router.push('/pool/setup')

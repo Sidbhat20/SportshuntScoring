@@ -17,6 +17,7 @@ export default function HockeyGamePage() {
   const [playerName, setPlayerName] = useState('')
   const [penaltyType, setPenaltyType] = useState<'minor' | 'major'>('minor')
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.homeTeam) {

@@ -102,6 +102,7 @@ export const useWaterPoloStore = create<WaterPoloState>((set, get) => ({
       const newShot = Math.max(0, state.shotClockSeconds - 1)
       set({ periodSeconds: newPeriod, shotClockSeconds: newShot })
       if (newPeriod === 0 || newShot === 0) set({ isRunning: false })
+      saveToStorage(STORAGE_KEY, get())
     }
   },
   

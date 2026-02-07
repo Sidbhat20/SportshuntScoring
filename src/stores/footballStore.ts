@@ -173,6 +173,7 @@ export const useFootballStore = create<FootballState>((set, get) => ({
     const state = get()
     if (state.isRunning) {
       set({ timerSeconds: state.timerSeconds + 1 })
+      saveToStorage(STORAGE_KEY, get())
     }
   },
   

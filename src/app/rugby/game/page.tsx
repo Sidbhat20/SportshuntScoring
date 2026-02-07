@@ -19,6 +19,7 @@ export default function RugbyGamePage() {
   const [conversionModal, setConversionModal] = useState(false)
   const [playerName, setPlayerName] = useState('')
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.homeTeam) {

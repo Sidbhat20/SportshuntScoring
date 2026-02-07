@@ -14,9 +14,16 @@ export function formatTimeWithHours(seconds: number): string {
   return formatTime(seconds)
 }
 
+const saveTimers: Record<string, ReturnType<typeof setTimeout>> = {}
+
 export function saveToStorage(key: string, data: any): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(key, JSON.stringify(data))
+    if (saveTimers[key]) {
+      clearTimeout(saveTimers[key])
+    }
+    saveTimers[key] = setTimeout(() => {
+      localStorage.setItem(key, JSON.stringify(data))
+    }, 150)
   }
 }
 

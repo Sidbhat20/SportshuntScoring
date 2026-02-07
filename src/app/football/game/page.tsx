@@ -22,6 +22,7 @@ export default function FootballGamePage() {
   const [extraTimeMinutes, setExtraTimeMinutes] = useState('15')
   
   // Load state and redirect if not setup
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.homeTeam) {

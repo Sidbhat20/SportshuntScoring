@@ -91,3 +91,125 @@
     @apply font-mono text-2xl font-semibold tabular-nums;
   }
 }
+
+/* ==========================================================================
+   PHONE-ONLY OPTIMIZATIONS (max-width: 639px)
+   These rules ONLY apply to phone-sized screens.
+   Desktop / tablet layouts are completely untouched.
+   ========================================================================== */
+
+/* --- Phone Portrait --- */
+@media (max-width: 639px) and (orientation: portrait) {
+  /* Tighter card padding on small phones */
+  .bg-white.rounded-xl.border {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.875rem;
+    padding-bottom: 0.875rem;
+  }
+
+  /* Slightly smaller score text so it never overflows */
+  .font-mono.tabular-nums {
+    font-size: clamp(2.25rem, 10vw, 3rem);
+  }
+
+  /* Tighter gap in 3-col scoreboard grid */
+  .grid.grid-cols-3 {
+    gap: 0.5rem;
+  }
+
+  /* Tighter gap in 2-col control grids */
+  .grid.grid-cols-2 {
+    gap: 0.75rem;
+  }
+
+  /* Reduce spacing between stacked buttons */
+  .space-y-3 > * + * {
+    margin-top: 0.5rem;
+  }
+  .space-y-2 > * + * {
+    margin-top: 0.375rem;
+  }
+}
+
+/* --- Phone Landscape --- */
+@media (max-width: 915px) and (max-height: 500px) and (orientation: landscape) {
+  /* Compact sticky header */
+  .sticky.top-0 .h-14,
+  .sticky.top-0 [class*="h-14"] {
+    height: 2.5rem;
+  }
+
+  /* Reduce content area padding so more fits on screen */
+  .max-w-4xl.mx-auto {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Compact card padding in landscape */
+  .bg-white.rounded-xl.border {
+    padding: 0.625rem 0.75rem;
+  }
+
+  /* Smaller score text to fit landscape height */
+  .font-mono.tabular-nums {
+    font-size: clamp(1.75rem, 7vw, 2.5rem);
+  }
+
+  /* Compact scoreboard margin */
+  .grid.grid-cols-3 {
+    gap: 0.375rem;
+  }
+
+  /* Tighter vertical spacing everywhere */
+  .mb-4 {
+    margin-bottom: 0.5rem;
+  }
+  .mb-3 {
+    margin-bottom: 0.375rem;
+  }
+  .mt-3, .mt-4 {
+    margin-top: 0.375rem;
+  }
+  .space-y-3 > * + * {
+    margin-top: 0.375rem;
+  }
+  .space-y-2 > * + * {
+    margin-top: 0.25rem;
+  }
+  .gap-4 {
+    gap: 0.5rem;
+  }
+
+  /* Compact button heights in landscape */
+  .min-h-\[48px\] {
+    min-height: 40px;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+  .min-h-\[56px\] {
+    min-height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Smaller team name / label text */
+  .text-sm.font-medium.text-text-muted {
+    font-size: 0.6875rem;
+  }
+  .text-xs.font-medium.uppercase {
+    font-size: 0.625rem;
+  }
+
+  /* Timer display smaller */
+  .font-mono.font-semibold.tabular-nums {
+    font-size: 1.125rem;
+  }
+
+  /* Make the 1-col control panel side-by-side in landscape */
+  .grid.grid-cols-1.md\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

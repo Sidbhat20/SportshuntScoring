@@ -11,6 +11,7 @@ export default function PickleballGamePage() {
   const router = useRouter()
   const store = usePickleballStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.team1) {

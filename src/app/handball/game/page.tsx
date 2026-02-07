@@ -14,8 +14,7 @@ export default function HandballGamePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const [suspensionModal, setSuspensionModal] = useState<{ open: boolean; team: 'home' | 'away' }>({ open: false, team: 'home' })
   const [playerName, setPlayerName] = useState('')
-  
-  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps  useEffect(() => {
     store.loadState()
     if (!store.homeTeam) router.push('/handball/setup')
   }, [])

@@ -10,6 +10,7 @@ export default function TableTennisGamePage() {
   const router = useRouter()
   const store = useTableTennisStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.playerA) router.push('/tabletennis/setup')

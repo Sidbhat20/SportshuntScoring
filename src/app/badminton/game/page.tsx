@@ -10,6 +10,7 @@ export default function BadmintonGamePage() {
   const router = useRouter()
   const store = useBadmintonStore()
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.playerA) router.push('/badminton/setup')

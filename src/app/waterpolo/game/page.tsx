@@ -11,6 +11,7 @@ export default function WaterPoloGamePage() {
   const store = useWaterPoloStore()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     store.loadState()
     if (!store.homeTeam) router.push('/waterpolo/setup')

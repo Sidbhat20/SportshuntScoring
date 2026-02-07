@@ -176,6 +176,7 @@ export const useHandballStore = create<HandballState>((set, get) => ({
         homeSuspensions: newHomeSuspensions,
         awaySuspensions: newAwaySuspensions
       })
+      saveToStorage(STORAGE_KEY, get())
     }
   },
   
