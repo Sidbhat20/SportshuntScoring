@@ -23,6 +23,7 @@ export const SPORTS: Sport[] = [
   { id: 'squash', name: 'Squash' },
   { id: 'cricket', name: 'Cricket' },
   { id: 'tugofwar', name: 'Tug of War' },
+  { id: 'throwball', name: 'Throwball' },
 ]
 
 export type GameAction = {
