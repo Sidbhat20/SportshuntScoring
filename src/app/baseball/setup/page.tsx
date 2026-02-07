@@ -30,7 +30,7 @@ export default function BaseballSetupPage() {
       
       <Card>
         <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-3">Innings</div>
-        <SelectButtons options={[{ value: 7, label: '7' }, { value: 9, label: '9' }]} value={innings} onChange={setInnings} />
+        <SelectButtons options={[{ value: 7, label: '7' }, { value: 9, label: '9' }]} value={innings} onChange={(v) => setInnings(Number(v))} />
       </Card>
     </SetupLayout>
   )

@@ -161,14 +161,16 @@ export default function CricketGamePage() {
       {/* Current Bowler & Partnership */}
       {!store.isComplete && (
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <Card onClick={() => openPlayerModal('bowler')} style={{ cursor: 'pointer' }}>
-            <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">Bowler</div>
-            <div className="font-medium">{store.currentBowler.name}</div>
-            <div className="font-mono text-sm text-text-muted">
-              {formatOvers(store.currentBowler.overs, store.currentBowler.balls)}-{store.currentBowler.wickets}-{store.currentBowler.runs}
-            </div>
-            <div className="text-xs text-text-muted">Econ: {bowlerEcon.toFixed(2)}</div>
-          </Card>
+          <div onClick={() => openPlayerModal('bowler')} className="cursor-pointer">
+            <Card>
+              <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">Bowler</div>
+              <div className="font-medium">{store.currentBowler.name}</div>
+              <div className="font-mono text-sm text-text-muted">
+                {formatOvers(store.currentBowler.overs, store.currentBowler.balls)}-{store.currentBowler.wickets}-{store.currentBowler.runs}
+              </div>
+              <div className="text-xs text-text-muted">Econ: {bowlerEcon.toFixed(2)}</div>
+            </Card>
+          </div>
           <Card>
             <div className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">Partnership</div>
             <div className="font-mono text-2xl font-bold">{store.currentPartnership}</div>

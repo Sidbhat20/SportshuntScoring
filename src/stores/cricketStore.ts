@@ -243,7 +243,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentBowler: newBowler,
       currentPartnership: state.currentPartnership + runs,
       currentOver: newCurrentOver,
-      actions: [...state.actions, { type: 'addRuns', runs, batting, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addRuns', team: batting, value: runs, timestamp: Date.now(), previousState: state }],
     }
     
     // Check if target chased
@@ -344,7 +344,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentBowler: newBowler,
       currentPartnership: 0,
       currentOver: newCurrentOver,
-      actions: [...state.actions, { type: 'addWicket', batting, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addWicket', team: batting, value: null, timestamp: Date.now(), previousState: state }],
     }
     
     // All out (10 wickets)
@@ -416,7 +416,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentBowler: newBowler,
       currentPartnership: state.currentPartnership + extraRuns,
       currentOver: newCurrentOver,
-      actions: [...state.actions, { type: 'addExtra', extraType: type, runs: extraRuns, batting, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addExtra', team: batting, value: { extraType: type, runs: extraRuns }, timestamp: Date.now(), previousState: state }],
     }
     
     // Check if target chased
@@ -566,7 +566,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       overs: newBowlerOvers,
       balls: finalBowlerBalls,
     }
-    newState.actions = [...state.actions, { type: 'nextBall', batting, timestamp: Date.now() }]
+    newState.actions = [...state.actions, { type: 'nextBall', team: batting, value: null, timestamp: Date.now(), previousState: state }]
     
     // Check if overs completed
     if (newOvers >= state.maxOvers && state.format !== 'Test') {
@@ -642,7 +642,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       currentPartnership: 0,
       currentOver: [],
       recentOvers: [],
-      actions: [...state.actions, { type: 'switchInnings', timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'switchInnings', team: null, value: null, timestamp: Date.now(), previousState: state }],
     }
     saveToStorage(STORAGE_KEY, newState)
     return newState
@@ -673,7 +673,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
       isComplete: true,
       homeBattingCard: batting === 'home' ? [...state.homeBattingCard, striker, nonStriker] : state.homeBattingCard,
       awayBattingCard: batting === 'away' ? [...state.awayBattingCard, striker, nonStriker] : state.awayBattingCard,
-      actions: [...state.actions, { type: 'endMatch', timestamp: Date.now() }] 
+      actions: [...state.actions, { type: 'endMatch', team: null, value: null, timestamp: Date.now(), previousState: state }] 
     }
     saveToStorage(STORAGE_KEY, newState)
     return newState
@@ -700,7 +700,7 @@ export const useCricketStore = create<CricketState>((set, get) => ({
         nonStrikerFours: tempStrikerFours,
         nonStrikerSixes: tempStrikerSixes,
       },
-      actions: [...state.actions, { type: 'toggleStriker', timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'toggleStriker', team: null, value: null, timestamp: Date.now(), previousState: state }],
     }
     saveToStorage(STORAGE_KEY, newState)
     return newState
@@ -740,13 +740,13 @@ export const useCricketStore = create<CricketState>((set, get) => ({
     const lastAction = actions.pop()!
     
     let newState = { ...state, actions, isComplete: false }
-    const batting = lastAction.batting as 'home' | 'away' | undefined
+    const batting = lastAction.team as 'home' | 'away' | null
     
     // Note: Full undo with player tracking would be complex
     // This is a simplified version that handles basic scoring
-    if (lastAction.type === 'addRuns' && batting && lastAction.runs) {
-      if (batting === 'home') newState.homeRuns = Math.max(0, state.homeRuns - lastAction.runs)
-      else newState.awayRuns = Math.max(0, state.awayRuns - lastAction.runs)
+    if (lastAction.type === 'addRuns' && batting && lastAction.value) {
+      if (batting === 'home') newState.homeRuns = Math.max(0, state.homeRuns - (lastAction.value as number))
+      else newState.awayRuns = Math.max(0, state.awayRuns - (lastAction.value as number))
     } else if (lastAction.type === 'addWicket' && batting) {
       if (batting === 'home') newState.homeWickets = Math.max(0, state.homeWickets - 1)
       else newState.awayWickets = Math.max(0, state.awayWickets - 1)
@@ -755,18 +755,19 @@ export const useCricketStore = create<CricketState>((set, get) => ({
         newState.battingTeam = batting
         newState.target = null
       }
-    } else if (lastAction.type === 'addExtra' && batting && lastAction.runs) {
+    } else if (lastAction.type === 'addExtra' && batting && lastAction.value) {
+      const extraData = lastAction.value as { extraType: string; runs: number }
       if (batting === 'home') {
-        newState.homeRuns = Math.max(0, state.homeRuns - lastAction.runs)
+        newState.homeRuns = Math.max(0, state.homeRuns - extraData.runs)
         newState.homeExtras = { ...state.homeExtras }
-        if (lastAction.extraType) {
-          newState.homeExtras[lastAction.extraType as keyof typeof newState.homeExtras] = Math.max(0, state.homeExtras[lastAction.extraType as keyof typeof state.homeExtras] - lastAction.runs)
+        if (extraData.extraType) {
+          newState.homeExtras[extraData.extraType as keyof typeof newState.homeExtras] = Math.max(0, state.homeExtras[extraData.extraType as keyof typeof state.homeExtras] - extraData.runs)
         }
       } else {
-        newState.awayRuns = Math.max(0, state.awayRuns - lastAction.runs)
+        newState.awayRuns = Math.max(0, state.awayRuns - extraData.runs)
         newState.awayExtras = { ...state.awayExtras }
-        if (lastAction.extraType) {
-          newState.awayExtras[lastAction.extraType as keyof typeof newState.awayExtras] = Math.max(0, state.awayExtras[lastAction.extraType as keyof typeof state.awayExtras] - lastAction.runs)
+        if (extraData.extraType) {
+          newState.awayExtras[extraData.extraType as keyof typeof newState.awayExtras] = Math.max(0, state.awayExtras[extraData.extraType as keyof typeof state.awayExtras] - extraData.runs)
         }
       }
     } else if (lastAction.type === 'nextBall' && batting) {

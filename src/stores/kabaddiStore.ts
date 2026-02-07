@@ -62,7 +62,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       ...state,
       homeScore: team === 'home' ? state.homeScore + points : state.homeScore,
       awayScore: team === 'away' ? state.awayScore + points : state.awayScore,
-      actions: [...state.actions, { type: 'addRaidPoints', team, points, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addRaidPoints', team, value: points, timestamp: Date.now(), previousState: { homeScore: state.homeScore, awayScore: state.awayScore } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -74,7 +74,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       ...state,
       homeScore: team === 'home' ? state.homeScore + points : state.homeScore,
       awayScore: team === 'away' ? state.awayScore + points : state.awayScore,
-      actions: [...state.actions, { type: 'addTacklePoints', team, points, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addTacklePoints', team, value: points, timestamp: Date.now(), previousState: { homeScore: state.homeScore, awayScore: state.awayScore } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -86,7 +86,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       ...state,
       homeScore: team === 'home' ? state.homeScore + points : state.homeScore,
       awayScore: team === 'away' ? state.awayScore + points : state.awayScore,
-      actions: [...state.actions, { type: 'addBonusPoints', team, points, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addBonusPoints', team, value: points, timestamp: Date.now(), previousState: { homeScore: state.homeScore, awayScore: state.awayScore } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -101,7 +101,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       awayScore: team === 'away' ? state.awayScore + 2 : state.awayScore,
       homePlayers: team === 'away' ? 7 : state.homePlayers,
       awayPlayers: team === 'home' ? 7 : state.awayPlayers,
-      actions: [...state.actions, { type: 'addAllOut', team, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addAllOut', team, value: 2, timestamp: Date.now(), previousState: { homeScore: state.homeScore, awayScore: state.awayScore, homePlayers: state.homePlayers, awayPlayers: state.awayPlayers } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -113,7 +113,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       ...state,
       homePlayers: team === 'home' ? Math.max(0, state.homePlayers - 1) : state.homePlayers,
       awayPlayers: team === 'away' ? Math.max(0, state.awayPlayers - 1) : state.awayPlayers,
-      actions: [...state.actions, { type: 'playerOut', team, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'playerOut', team, value: null, timestamp: Date.now(), previousState: { homePlayers: state.homePlayers, awayPlayers: state.awayPlayers } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -125,7 +125,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       ...state,
       homePlayers: team === 'home' ? Math.min(7, state.homePlayers + 1) : state.homePlayers,
       awayPlayers: team === 'away' ? Math.min(7, state.awayPlayers + 1) : state.awayPlayers,
-      actions: [...state.actions, { type: 'revivePlayer', team, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'revivePlayer', team, value: null, timestamp: Date.now(), previousState: { homePlayers: state.homePlayers, awayPlayers: state.awayPlayers } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -138,7 +138,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
       half: 2 as const,
       homePlayers: 7,
       awayPlayers: 7,
-      actions: [...state.actions, { type: 'nextHalf', timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'nextHalf', team: null, value: 2, timestamp: Date.now(), previousState: { half: state.half } }],
     }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
@@ -146,7 +146,7 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
   
   endMatch: () => {
     const state = get()
-    const newState = { ...state, isComplete: true, actions: [...state.actions, { type: 'endMatch', timestamp: Date.now() }] }
+    const newState = { ...state, isComplete: true, actions: [...state.actions, { type: 'endMatch', team: null, value: null, timestamp: Date.now(), previousState: { isComplete: state.isComplete } }] }
     set(newState)
     saveToStorage(STORAGE_KEY, newState)
   },
@@ -159,15 +159,15 @@ export const useKabaddiStore = create<KabaddiState>((set, get) => ({
     
     let newState = { ...state, actions, isComplete: false }
     
-    if (lastAction.type === 'addRaidPoints' && lastAction.team && lastAction.points) {
-      if (lastAction.team === 'home') newState.homeScore = Math.max(0, state.homeScore - lastAction.points)
-      else newState.awayScore = Math.max(0, state.awayScore - lastAction.points)
-    } else if (lastAction.type === 'addTacklePoints' && lastAction.team && lastAction.points) {
-      if (lastAction.team === 'home') newState.homeScore = Math.max(0, state.homeScore - lastAction.points)
-      else newState.awayScore = Math.max(0, state.awayScore - lastAction.points)
-    } else if (lastAction.type === 'addBonusPoints' && lastAction.team && lastAction.points) {
-      if (lastAction.team === 'home') newState.homeScore = Math.max(0, state.homeScore - lastAction.points)
-      else newState.awayScore = Math.max(0, state.awayScore - lastAction.points)
+    if (lastAction.type === 'addRaidPoints' && lastAction.team && lastAction.value) {
+      if (lastAction.team === 'home') newState.homeScore = Math.max(0, state.homeScore - (lastAction.value as number))
+      else newState.awayScore = Math.max(0, state.awayScore - (lastAction.value as number))
+    } else if (lastAction.type === 'addTacklePoints' && lastAction.team && lastAction.value) {
+      if (lastAction.team === 'home') newState.homeScore = Math.max(0, state.homeScore - (lastAction.value as number))
+      else newState.awayScore = Math.max(0, state.awayScore - (lastAction.value as number))
+    } else if (lastAction.type === 'addBonusPoints' && lastAction.team && lastAction.value) {
+      if (lastAction.team === 'home') newState.homeScore = Math.max(0, state.homeScore - (lastAction.value as number))
+      else newState.awayScore = Math.max(0, state.awayScore - (lastAction.value as number))
     } else if (lastAction.type === 'addAllOut' && lastAction.team) {
       if (lastAction.team === 'home') {
         newState.homeScore = Math.max(0, state.homeScore - 2)

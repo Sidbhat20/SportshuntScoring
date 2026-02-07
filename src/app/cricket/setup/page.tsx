@@ -40,7 +40,7 @@ export default function CricketSetupPage() {
             { value: 'Custom', label: 'Custom' },
           ]}
           value={format}
-          onChange={setFormat}
+          onChange={(v) => setFormat(v as 'T20' | 'ODI' | 'Test' | 'Custom')}
         />
       </Card>
       

@@ -83,7 +83,7 @@ export const useBaseballStore = create<BaseballState>((set, get) => ({
       ...state,
       homeRuns: newHomeRuns,
       awayRuns: newAwayRuns,
-      actions: [...state.actions, { type: 'addRuns', team, runs, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addRuns', team, value: runs, timestamp: Date.now(), previousState: state }],
     }
     saveToStorage(STORAGE_KEY, newState)
     return newState
@@ -94,7 +94,7 @@ export const useBaseballStore = create<BaseballState>((set, get) => ({
       ...state,
       homeHits: team === 'home' ? state.homeHits + 1 : state.homeHits,
       awayHits: team === 'away' ? state.awayHits + 1 : state.awayHits,
-      actions: [...state.actions, { type: 'addHit', team, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addHit', team, value: null, timestamp: Date.now(), previousState: state }],
     }
     saveToStorage(STORAGE_KEY, newState)
     return newState
@@ -105,7 +105,7 @@ export const useBaseballStore = create<BaseballState>((set, get) => ({
       ...state,
       homeErrors: team === 'home' ? state.homeErrors + 1 : state.homeErrors,
       awayErrors: team === 'away' ? state.awayErrors + 1 : state.awayErrors,
-      actions: [...state.actions, { type: 'addError', team, timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addError', team, value: null, timestamp: Date.now(), previousState: state }],
     }
     saveToStorage(STORAGE_KEY, newState)
     return newState
@@ -116,7 +116,7 @@ export const useBaseballStore = create<BaseballState>((set, get) => ({
     let newState = {
       ...state,
       outs: newOuts,
-      actions: [...state.actions, { type: 'addOut', timestamp: Date.now() }],
+      actions: [...state.actions, { type: 'addOut', team: null, value: null, timestamp: Date.now(), previousState: state }],
     }
     
     if (newOuts >= 3) {
@@ -149,7 +149,7 @@ export const useBaseballStore = create<BaseballState>((set, get) => ({
   }),
   
   nextHalfInning: () => set((state) => {
-    let newState = { ...state, actions: [...state.actions, { type: 'nextHalfInning', timestamp: Date.now() }] }
+    let newState = { ...state, actions: [...state.actions, { type: 'nextHalfInning', team: null, value: null, timestamp: Date.now(), previousState: state }] }
     
     if (state.isTopHalf) {
       newState.isTopHalf = false
@@ -185,15 +185,15 @@ export const useBaseballStore = create<BaseballState>((set, get) => ({
     
     let newState = { ...state, actions }
     
-    if (lastAction.type === 'addRuns' && lastAction.team && lastAction.runs) {
+    if (lastAction.type === 'addRuns' && lastAction.team && lastAction.value) {
       const inningIndex = state.currentInning - 1
       if (lastAction.team === 'home') {
         const newHomeRuns = [...state.homeRuns]
-        newHomeRuns[inningIndex] = Math.max(0, (newHomeRuns[inningIndex] || 0) - lastAction.runs)
+        newHomeRuns[inningIndex] = Math.max(0, (newHomeRuns[inningIndex] || 0) - lastAction.value)
         newState.homeRuns = newHomeRuns
       } else {
         const newAwayRuns = [...state.awayRuns]
-        newAwayRuns[inningIndex] = Math.max(0, (newAwayRuns[inningIndex] || 0) - lastAction.runs)
+        newAwayRuns[inningIndex] = Math.max(0, (newAwayRuns[inningIndex] || 0) - lastAction.value)
         newState.awayRuns = newAwayRuns
       }
     } else if (lastAction.type === 'addHit' && lastAction.team) {
